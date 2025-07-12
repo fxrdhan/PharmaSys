@@ -1,5 +1,5 @@
 import { AgGridReact } from "ag-grid-react";
-import { ColDef, RowClickedEvent, RowClassParams, ModuleRegistry, AllCommunityModule, RowStyle } from "ag-grid-community";
+import { ColDef, RowClickedEvent, RowClassParams, ModuleRegistry, AllCommunityModule, RowStyle, Column } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { useMemo } from "react";
@@ -98,8 +98,8 @@ export default function DataGrid<T = unknown>({
             setTimeout(() => {
               const allDisplayedColumns = params.api.getAllDisplayedColumns();
               const otherColumnsWidth = allDisplayedColumns
-                .filter((col: any) => col.getColId() !== 'name')
-                .reduce((sum: number, col: any) => sum + col.getActualWidth(), 0);
+                .filter((col: Column) => col.getColId() !== 'name')
+                .reduce((sum: number, col: Column) => sum + col.getActualWidth(), 0);
               
               const gridElement = document.querySelector('.ag-theme-alpine');
               const containerWidth = gridElement ? gridElement.clientWidth : 1200;
@@ -124,8 +124,8 @@ export default function DataGrid<T = unknown>({
           setTimeout(() => {
             const allDisplayedColumns = params.api.getAllDisplayedColumns();
             const otherColumnsWidth = allDisplayedColumns
-              .filter((col: any) => col.getColId() !== 'name')
-              .reduce((sum: number, col: any) => sum + col.getActualWidth(), 0);
+              .filter((col: Column) => col.getColId() !== 'name')
+              .reduce((sum: number, col: Column) => sum + col.getActualWidth(), 0);
             
             const gridElement = document.querySelector('.ag-theme-alpine');
             const containerWidth = gridElement ? gridElement.clientWidth : 1200;
@@ -138,8 +138,8 @@ export default function DataGrid<T = unknown>({
           setTimeout(() => {
             const allDisplayedColumns = params.api.getAllDisplayedColumns();
             const otherColumnsWidth = allDisplayedColumns
-              .filter((col: any) => col.getColId() !== 'name')
-              .reduce((sum: number, col: any) => sum + col.getActualWidth(), 0);
+              .filter((col: Column) => col.getColId() !== 'name')
+              .reduce((sum: number, col: Column) => sum + col.getActualWidth(), 0);
             
             const gridElement = document.querySelector('.ag-theme-alpine');
             const containerWidth = gridElement ? gridElement.clientWidth : 1200;
