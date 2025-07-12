@@ -12,7 +12,7 @@ import AddItemPortal from "@/components/add-edit/v2";
 import { useMasterDataManagement } from "@/handlers/masterData";
 import { getSearchState } from "@/utils/search";
 import DataGrid from "@/components/data-grid";
-import { ColDef, RowClickedEvent, RowClassParams } from "ag-grid-community";
+import { ColDef, RowClickedEvent, RowClassParams, ICellRendererParams } from "ag-grid-community";
 
 function ItemList() {
   const location = useLocation();
@@ -99,7 +99,7 @@ function ItemList() {
         width: 200,
         sortable: true,
         filter: true,
-        cellRenderer: (params: any) => params.value || "-",
+        cellRenderer: (params: ICellRendererParams<ItemDataType>) => params.value || "-",
       },
       {
         headerName: "Kode",
@@ -107,7 +107,7 @@ function ItemList() {
         width: 120,
         sortable: true,
         filter: true,
-        cellRenderer: (params: any) => params.value || "-",
+        cellRenderer: (params: ICellRendererParams<ItemDataType>) => params.value || "-",
       },
       {
         headerName: "Barcode",
@@ -115,35 +115,35 @@ function ItemList() {
         width: 120,
         sortable: true,
         filter: true,
-        cellRenderer: (params: any) => params.value || "-",
+        cellRenderer: (params: ICellRendererParams<ItemDataType>) => params.value || "-",
       },
       {
         headerName: "Kategori",
         width: 120,
         sortable: true,
         filter: true,
-        cellRenderer: (params: any) => params.data?.category?.name || "-",
+        cellRenderer: (params: ICellRendererParams<ItemDataType>) => params.data?.category?.name || "-",
       },
       {
         headerName: "Jenis",
         width: 120,
         sortable: true,
         filter: true,
-        cellRenderer: (params: any) => params.data?.type?.name || "-",
+        cellRenderer: (params: ICellRendererParams<ItemDataType>) => params.data?.type?.name || "-",
       },
       {
         headerName: "Satuan",
         width: 100,
         sortable: true,
         filter: true,
-        cellRenderer: (params: any) => params.data?.unit?.name || "-",
+        cellRenderer: (params: ICellRendererParams<ItemDataType>) => params.data?.unit?.name || "-",
       },
       {
         headerName: "Satuan Turunan",
         width: 140,
         sortable: false,
         filter: false,
-        cellRenderer: (params: any) => {
+        cellRenderer: (params: ICellRendererParams<ItemDataType>) => {
           const conversions = params.data?.unit_conversions;
           if (conversions && conversions.length > 0) {
             return conversions
@@ -160,7 +160,7 @@ function ItemList() {
         sortable: true,
         filter: "agNumberColumnFilter",
         cellClass: "text-right",
-        cellRenderer: (params: any) => {
+        cellRenderer: (params: ICellRendererParams<ItemDataType>) => {
           if (params.value != null) {
             return params.value.toLocaleString("id-ID", {
               style: "currency",
@@ -177,7 +177,7 @@ function ItemList() {
         sortable: true,
         filter: "agNumberColumnFilter",
         cellClass: "text-right",
-        cellRenderer: (params: any) => {
+        cellRenderer: (params: ICellRendererParams<ItemDataType>) => {
           if (params.value != null) {
             return params.value.toLocaleString("id-ID", {
               style: "currency",
@@ -196,7 +196,7 @@ function ItemList() {
         sortable: true,
         filter: "agNumberColumnFilter",
         cellClass: "text-center",
-        cellRenderer: (params: any) => params.value?.toString() || "0",
+        cellRenderer: (params: ICellRendererParams<ItemDataType>) => params.value?.toString() || "0",
       },
     ],
     [],
