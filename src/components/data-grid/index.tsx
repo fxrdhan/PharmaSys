@@ -33,6 +33,7 @@ export default function DataGrid<T = unknown>({
     sortable: true,
     filter: false,
     editable: false,
+    flex: 1,
   }), []);
 
   const overlayTemplate = useMemo(() => {
@@ -87,6 +88,12 @@ export default function DataGrid<T = unknown>({
             params.api.sizeColumnsToFit();
             params.api.resetRowHeights();
           }, 100);
+        }}
+        onFirstDataRendered={(params) => {
+          params.api.sizeColumnsToFit();
+        }}
+        onGridSizeChanged={(params) => {
+          params.api.sizeColumnsToFit();
         }}
       />
     </div>
