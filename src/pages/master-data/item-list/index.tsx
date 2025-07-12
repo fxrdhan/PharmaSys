@@ -272,7 +272,7 @@ function ItemList() {
             ) : (
               <>
                 <DataGrid<ItemDataType>
-                  rowData={items}
+                  rowData={items as ItemDataType[]}
                   columnDefs={columnDefs}
                   onRowClicked={onRowClicked}
                   getRowStyle={getRowStyle}
