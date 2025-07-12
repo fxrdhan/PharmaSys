@@ -7,18 +7,18 @@ import { useMemo } from "react";
 // Register AG Grid modules
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-interface DataGridProps<T = any> {
+interface DataGridProps<T = unknown> {
   rowData: T[];
   columnDefs: ColDef<T>[];
   onRowClicked?: (event: RowClickedEvent<T>) => void;
-  getRowStyle?: (params: RowClassParams<T>) => any;
+  getRowStyle?: (params: RowClassParams<T>) => Record<string, unknown> | undefined;
   height?: string | number;
   className?: string;
   noDataMessage?: string;
   searchQuery?: string;
 }
 
-export default function DataGrid<T = any>({
+export default function DataGrid<T = unknown>({
   rowData,
   columnDefs,
   onRowClicked,
