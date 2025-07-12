@@ -96,8 +96,7 @@ function ItemList() {
       {
         headerName: "Nama Item",
         field: "name",
-        colId: "name",
-        minWidth: 200,
+        width: 350,
         sortable: true,
         filter: true,
         cellRenderer: (params: ICellRendererParams<ItemDataType>) => params.value || "-",
