@@ -33,7 +33,6 @@ export default function DataGrid<T = unknown>({
     sortable: true,
     filter: false,
     editable: false,
-    flex: 1,
   }), []);
 
   const overlayTemplate = useMemo(() => {
@@ -85,15 +84,69 @@ export default function DataGrid<T = unknown>({
         overlayNoRowsTemplate={overlayTemplate}
         onGridReady={(params) => {
           setTimeout(() => {
-            params.api.sizeColumnsToFit();
+            // Auto-size all columns except the name column
+            const allColumns = params.api.getAllDisplayedColumns();
+            const columnsToAutoSize = allColumns
+              .filter(col => col.getColId() !== 'name')
+              .map(col => col.getColId());
+            
+            if (columnsToAutoSize.length > 0) {
+              params.api.autoSizeColumns(columnsToAutoSize, false);
+            }
+            
+            // Calculate remaining width for name column
+            setTimeout(() => {
+              const allDisplayedColumns = params.api.getAllDisplayedColumns();
+              const otherColumnsWidth = allDisplayedColumns
+                .filter((col: any) => col.getColId() !== 'name')
+                .reduce((sum: number, col: any) => sum + col.getActualWidth(), 0);
+              
+              const gridElement = document.querySelector('.ag-theme-alpine');
+              const containerWidth = gridElement ? gridElement.clientWidth : 1200;
+              const nameColumnWidth = Math.max(containerWidth - otherColumnsWidth - 40, 200);
+              
+              params.api.setColumnWidths([{ key: 'name', newWidth: nameColumnWidth }]);
+            }, 50);
+            
             params.api.resetRowHeights();
           }, 100);
         }}
         onFirstDataRendered={(params) => {
-          params.api.sizeColumnsToFit();
+          const allColumns = params.api.getAllDisplayedColumns();
+          const columnsToAutoSize = allColumns
+            .filter(col => col.getColId() !== 'name')
+            .map(col => col.getColId());
+          
+          if (columnsToAutoSize.length > 0) {
+            params.api.autoSizeColumns(columnsToAutoSize, false);
+          }
+          
+          setTimeout(() => {
+            const allDisplayedColumns = params.api.getAllDisplayedColumns();
+            const otherColumnsWidth = allDisplayedColumns
+              .filter((col: any) => col.getColId() !== 'name')
+              .reduce((sum: number, col: any) => sum + col.getActualWidth(), 0);
+            
+            const gridElement = document.querySelector('.ag-theme-alpine');
+            const containerWidth = gridElement ? gridElement.clientWidth : 1200;
+            const nameColumnWidth = Math.max(containerWidth - otherColumnsWidth - 40, 200);
+            
+            params.api.setColumnWidths([{ key: 'name', newWidth: nameColumnWidth }]);
+          }, 50);
         }}
         onGridSizeChanged={(params) => {
-          params.api.sizeColumnsToFit();
+          setTimeout(() => {
+            const allDisplayedColumns = params.api.getAllDisplayedColumns();
+            const otherColumnsWidth = allDisplayedColumns
+              .filter((col: any) => col.getColId() !== 'name')
+              .reduce((sum: number, col: any) => sum + col.getActualWidth(), 0);
+            
+            const gridElement = document.querySelector('.ag-theme-alpine');
+            const containerWidth = gridElement ? gridElement.clientWidth : 1200;
+            const nameColumnWidth = Math.max(containerWidth - otherColumnsWidth - 40, 200);
+            
+            params.api.setColumnWidths([{ key: 'name', newWidth: nameColumnWidth }]);
+          }, 50);
         }}
       />
     </div>
