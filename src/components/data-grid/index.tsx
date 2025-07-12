@@ -16,7 +16,6 @@ interface DataGridProps<T = any> {
   className?: string;
   noDataMessage?: string;
   searchQuery?: string;
-  loading?: boolean;
 }
 
 export default function DataGrid<T = any>({
@@ -27,8 +26,7 @@ export default function DataGrid<T = any>({
   height = '500px',
   className = '',
   noDataMessage,
-  searchQuery,
-  loading = false
+  searchQuery
 }: DataGridProps<T>) {
   const defaultColDef: ColDef = useMemo(() => ({
     resizable: true,
