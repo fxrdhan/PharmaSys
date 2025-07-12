@@ -3,15 +3,9 @@ import SearchBar from "@/components/search-bar";
 import PageTitle from "@/components/page-title";
 import Pagination from "@/components/pagination";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import {
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-  TableHeader,
   ItemListSkeleton,
 } from "@/components/table";
 import { FaPlus } from "react-icons/fa";
@@ -20,6 +14,13 @@ import type { Item as ItemDataType, UnitConversion } from "@/types";
 import AddItemPortal from "@/components/add-edit/v2";
 import { useMasterDataManagement } from "@/handlers/masterData";
 import { getSearchState } from "@/utils/search";
+import { AgGridReact } from "ag-grid-react";
+import { ColDef, RowClickedEvent, RowClassParams, ModuleRegistry, AllCommunityModule } from "ag-grid-community";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+
+// Register AG Grid modules
+ModuleRegistry.registerModules([AllCommunityModule]);
 
 function ItemList() {
   const location = useLocation();
@@ -98,6 +99,144 @@ function ItemList() {
     }
   };
 
+  const columnDefs: ColDef<ItemDataType>[] = useMemo(() => [
+    {
+      headerName: "Nama Item",
+      field: "name",
+      width: 200,
+      sortable: true,
+      filter: true,
+      cellRenderer: (params: any) => params.value || "-",
+    },
+    {
+      headerName: "Kode",
+      field: "code",
+      width: 120,
+      sortable: true,
+      filter: true,
+      cellRenderer: (params: any) => params.value || "-",
+    },
+    {
+      headerName: "Barcode",
+      field: "barcode",
+      width: 120,
+      sortable: true,
+      filter: true,
+      cellRenderer: (params: any) => params.value || "-",
+    },
+    {
+      headerName: "Kategori",
+      width: 120,
+      sortable: true,
+      filter: true,
+      cellRenderer: (params: any) => params.data?.category?.name || "-",
+    },
+    {
+      headerName: "Jenis",
+      width: 120,
+      sortable: true,
+      filter: true,
+      cellRenderer: (params: any) => params.data?.type?.name || "-",
+    },
+    {
+      headerName: "Satuan",
+      width: 100,
+      sortable: true,
+      filter: true,
+      cellRenderer: (params: any) => params.data?.unit?.name || "-",
+    },
+    {
+      headerName: "Satuan Turunan",
+      width: 140,
+      sortable: false,
+      filter: false,
+      cellRenderer: (params: any) => {
+        const conversions = params.data?.unit_conversions;
+        if (conversions && conversions.length > 0) {
+          return conversions
+            .map((uc: UnitConversion) => uc.unit?.name || "N/A")
+            .join(", ");
+        }
+        return "-";
+      },
+    },
+    {
+      headerName: "Harga Pokok",
+      field: "base_price",
+      width: 140,
+      sortable: true,
+      filter: "agNumberColumnFilter",
+      cellClass: "text-right",
+      cellRenderer: (params: any) => {
+        if (params.value != null) {
+          return params.value.toLocaleString("id-ID", {
+            style: "currency",
+            currency: "IDR",
+          });
+        }
+        return "-";
+      },
+    },
+    {
+      headerName: "Harga Jual",
+      field: "sell_price",
+      width: 140,
+      sortable: true,
+      filter: "agNumberColumnFilter",
+      cellClass: "text-right",
+      cellRenderer: (params: any) => {
+        if (params.value != null) {
+          return params.value.toLocaleString("id-ID", {
+            style: "currency",
+            currency: "IDR",
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+          });
+        }
+        return "-";
+      },
+    },
+    {
+      headerName: "Stok",
+      field: "stock",
+      width: 80,
+      sortable: true,
+      filter: "agNumberColumnFilter",
+      cellClass: "text-center",
+      cellRenderer: (params: any) => params.value?.toString() || "0",
+    },
+  ], []);
+
+  const defaultColDef: ColDef = useMemo(() => ({
+    resizable: true,
+    sortable: true,
+    filter: false,
+    editable: false,
+  }), []);
+
+  const onRowClicked = (event: RowClickedEvent<ItemDataType>) => {
+    const item = event.data as ItemDataType;
+    handleItemEdit(item);
+  };
+
+  const getRowStyle = (params: RowClassParams<ItemDataType>) => {
+    const isFirstItem = params.node.rowIndex === 0 && debouncedSearch;
+    if (isFirstItem) {
+      return { backgroundColor: 'rgb(209 250 229 / 0.5)' }; // emerald-100/50
+    }
+    return undefined;
+  };
+
+  // Debug log untuk melihat perubahan data
+  console.log('Current items state:', {
+    length: items.length,
+    isLoading: isLoadingState,
+    isError: isErrorState,
+    currentPage,
+    totalItems: totalItemsState,
+    items: items.slice(0, 2) // Show first 2 items for debugging
+  });
+
   return (
     <>
       <Card
@@ -143,119 +282,58 @@ function ItemList() {
             {isLoadingState && items.length === 0 ? (
               <ItemListSkeleton rows={8} />
             ) : (
-              <Table
-                scrollable={true}
-                stickyHeader={true}
-                autoSize={true}
-                columns={[
-                  { key: "name", header: "Nama Item", minWidth: 200 },
-                  { key: "code", header: "Kode", minWidth: 80 },
-                  { key: "barcode", header: "Barcode", minWidth: 100 },
-                  { key: "category", header: "Kategori", minWidth: 100 },
-                  { key: "type", header: "Jenis", minWidth: 120 },
-                  { key: "unit", header: "Satuan", minWidth: 80 },
-                  {
-                    key: "unit_conversions",
-                    header: "Satuan Turunan",
-                    minWidth: 140,
-                  },
-                  {
-                    key: "base_price",
-                    header: "Harga Pokok",
-                    minWidth: 120,
-                    align: "right",
-                  },
-                  {
-                    key: "sell_price",
-                    header: "Harga Jual",
-                    minWidth: 120,
-                    align: "right",
-                  },
-                  {
-                    key: "stock",
-                    header: "Stok",
-                    minWidth: 80,
-                    align: "center",
-                  },
-                ]}
-                data={items}
-              >
-                <TableHead>
-                  <TableRow>
-                    <TableHeader>Nama Item</TableHeader>
-                    <TableHeader>Kode</TableHeader>
-                    <TableHeader>Barcode</TableHeader>
-                    <TableHeader>Kategori</TableHeader>
-                    <TableHeader>Jenis</TableHeader>
-                    <TableHeader>Satuan</TableHeader>
-                    <TableHeader>Satuan Turunan</TableHeader>
-                    <TableHeader className="text-right">
-                      Harga Pokok
-                    </TableHeader>
-                    <TableHeader className="text-right">Harga Jual</TableHeader>
-                    <TableHeader className="text-center">Stok</TableHeader>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {items.length === 0 ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={10}
-                        className="text-center text-gray-500 py-10"
-                      >
-                        {debouncedSearch
+              <>
+                <div 
+                  className="ag-theme-alpine w-full"
+                  style={{ 
+                    height: '500px',
+                    minHeight: '500px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px'
+                  }}
+                >
+                  <AgGridReact
+                    theme="legacy"
+                    rowData={items as ItemDataType[]}
+                    columnDefs={columnDefs}
+                    defaultColDef={defaultColDef}
+                    onRowClicked={onRowClicked}
+                    getRowStyle={getRowStyle}
+                    suppressCellFocus={true}
+                    rowSelection={{
+                      mode: 'singleRow',
+                      enableClickSelection: false
+                    }}
+                    rowClass="cursor-pointer hover:bg-blue-50"
+                    headerHeight={45}
+                    rowHeight={50}
+                    animateRows={true}
+                    suppressMovableColumns={true}
+                    domLayout="normal"
+                    overlayNoRowsTemplate={`
+                      <div class="text-center text-gray-500 py-10">
+                        ${debouncedSearch
                           ? `Tidak ada item dengan nama "${debouncedSearch}"`
                           : "Tidak ada data item yang ditemukan"}
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    (items as ItemDataType[]).map((item, index) => (
-                      <TableRow
-                        key={item.id}
-                        onClick={() => handleItemEdit(item)}
-                        className={`cursor-pointer hover:bg-blue-50 ${
-                          index === 0 && debouncedSearch
-                            ? "bg-emerald-100/50"
-                            : ""
-                        }`}
-                      >
-                        <TableCell>{item.name}</TableCell>
-                        <TableCell>{item.code}</TableCell>
-                        <TableCell>{item.barcode || "-"}</TableCell>
-                        <TableCell>{item.category.name}</TableCell>
-                        <TableCell>{item.type.name}</TableCell>
-                        <TableCell>{item.unit.name}</TableCell>
-                        <TableCell>
-                          {item.unit_conversions &&
-                          item.unit_conversions.length > 0
-                            ? item.unit_conversions
-                                .map(
-                                  (uc: UnitConversion) =>
-                                    uc.unit?.name || "N/A",
-                                )
-                                .join(", ")
-                            : "-"}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {item.base_price.toLocaleString("id-ID", {
-                            style: "currency",
-                            currency: "IDR",
-                          })}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {item.sell_price.toLocaleString("id-ID", {
-                            style: "currency",
-                            currency: "IDR",
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 0,
-                          })}
-                        </TableCell>
-                        <TableCell>{item.stock}</TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+                      </div>
+                    `}
+                    onGridReady={(params) => {
+                      console.log('AG Grid ready, rowData length:', items.length);
+                      console.log('Items data:', items);
+                      console.log('Sample item:', items[0]);
+                      console.log('Column definitions:', columnDefs);
+                      setTimeout(() => {
+                        params.api.sizeColumnsToFit();
+                        params.api.resetRowHeights();
+                      }, 100);
+                    }}
+                  />
+                </div>
+                {/* Debug info */}
+                <div className="text-xs text-gray-500 mt-2">
+                  Debug: {items.length} items loaded, Loading: {isLoadingState.toString()}, Error: {isErrorState.toString()}
+                </div>
+              </>
             )}
             <Pagination
               currentPage={currentPage}
