@@ -1,5 +1,5 @@
 import { AgGridReact } from "ag-grid-react";
-import { ColDef, RowClickedEvent, RowClassParams, ModuleRegistry, AllCommunityModule } from "ag-grid-community";
+import { ColDef, RowClickedEvent, RowClassParams, ModuleRegistry, AllCommunityModule, RowStyle } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { useMemo } from "react";
@@ -11,7 +11,7 @@ interface DataGridProps<T = unknown> {
   rowData: T[];
   columnDefs: ColDef<T>[];
   onRowClicked?: (event: RowClickedEvent<T>) => void;
-  getRowStyle?: (params: RowClassParams<T>) => Record<string, unknown> | undefined;
+  getRowStyle?: (params: RowClassParams<T>) => RowStyle | undefined;
   height?: string | number;
   className?: string;
   noDataMessage?: string;
